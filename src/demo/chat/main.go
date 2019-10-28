@@ -8,6 +8,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 var addr = flag.String("addr", ":8080", "http service address")
@@ -32,6 +33,13 @@ func main() {
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
+	})
+	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		id, _ := strconv.Atoi(r.Form.Get("id"))
+		msg := map[string]interface{}{"id": id, "msg": []byte("hello")}
+		hub.broadcastID <- msg
+		w.Write([]byte("publish"))
 	})
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {

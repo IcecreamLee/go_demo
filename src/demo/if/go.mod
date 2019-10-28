@@ -9,4 +9,4 @@ require (
 	icecream v0.0.0-00010101000000-000000000000
 )
 
-replace icecream => D:\Go\project\test\src\icecream
+replace icecream => /Volumes/Dev/Go/src/go_study_project/src/icecream

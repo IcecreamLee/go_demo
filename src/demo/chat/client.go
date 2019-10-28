@@ -46,6 +46,10 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	ID int
+
+	Room string
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -132,7 +136,8 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	hub.ClientIdMax++
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), ID: hub.ClientIdMax}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

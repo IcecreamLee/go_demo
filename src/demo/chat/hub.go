@@ -4,28 +4,35 @@
 
 package main
 
+import "log"
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
 	// Registered clients.
-	clients map[*Client]bool
+	clients map[int]*Client
 
 	// Inbound messages from the clients.
 	broadcast chan []byte
+
+	broadcastID chan map[string]interface{}
 
 	// Register requests from the clients.
 	register chan *Client
 
 	// Unregister requests from clients.
 	unregister chan *Client
+
+	ClientIdMax int
 }
 
 func newHub() *Hub {
 	return &Hub{
-		broadcast:  make(chan []byte),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		clients:    make(map[*Client]bool),
+		broadcast:   make(chan []byte),
+		broadcastID: make(chan map[string]interface{}),
+		register:    make(chan *Client),
+		unregister:  make(chan *Client),
+		clients:     make(map[int]*Client),
 	}
 }
 
@@ -33,21 +40,26 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.clients[client] = true
+			log.Printf("client: %+v\n", client)
+			h.clients[client.ID] = client
 		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
+			if _, ok := h.clients[client.ID]; ok {
+				delete(h.clients, client.ID)
 				close(client.send)
 			}
 		case message := <-h.broadcast:
-			for client := range h.clients {
+			for i, client := range h.clients {
 				select {
 				case client.send <- message:
 				default:
 					close(client.send)
-					delete(h.clients, client)
+					delete(h.clients, i)
 				}
 			}
+		case mapInfo := <-h.broadcastID:
+			id := mapInfo["id"].(int)
+			message := mapInfo["msg"].([]byte)
+			h.clients[id].send <- message
 		}
 	}
 }
