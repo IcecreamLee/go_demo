@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "header"}}
+<body>
+<p>My name is {{.Name}}, I am {{.Age}} age.</p>
+My books:
+<ul>
+    {{ range .Books}}
+    <li>{{ .}}</li>
+    {{ end}}
+</ul>
+My classmates:
+<ul>
+    {{ range $name, $age := .Classmates}}
+    <li>name: {{$name}}, age: {{$age}}</li>
+    {{ end}}
+</ul>
+</body>
+</html>

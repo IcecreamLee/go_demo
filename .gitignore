@@ -1,0 +1,6 @@
+.idea
+*.exe
+*.log
+demo/socket.io/certificate.crt
+demo/socket.io/fullchain.crt
+demo/socket.io/private.pem

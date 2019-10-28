@@ -1,0 +1,117 @@
+// Copyright 2015 Daniel Theophanes.
+// Use of this source code is governed by a zlib-style
+// license that can be found in the LICENSE file.
+
+// Simple service that only works by printing a log message every few seconds.
+// package main2
+
+import (
+	"flag"
+	"github.com/kardianos/service"
+	"log"
+	"os"
+)
+
+var logger service.Logger
+
+// Program structures.
+//  Define Start and Stop methods.
+type program struct {
+	exit chan struct{}
+}
+
+func (p *program) Start(s service.Service) error {
+	if service.Interactive() {
+		logger.Info("Running in terminal.")
+	} else {
+		logger.Info("Running under service manager.")
+	}
+	p.exit = make(chan struct{})
+
+	// Start should not block. Do the actual work async.
+	go p.run()
+	return nil
+}
+func (p *program) run() error {
+	logger.Infof("I'm running %v.", service.Platform())
+	return nil
+}
+func (p *program) Stop(s service.Service) error {
+	// Any work in Stop should be quick, usually a few seconds at most.
+	logger.Info("I'm Stopping!")
+	close(p.exit)
+	return nil
+}
+
+// Service setup.
+//   Define service config.
+//   Create the service.
+//   Setup the logger.
+//   Handle service controls (optional).
+//   Run the service.
+func main() {
+	flag.Parse()
+
+	svcConfig := &service.Config{
+		Name:        "AGoServiceExampleLogging",
+		DisplayName: "A Go Service Example for Logging",
+		Description: "A This is an example Go service that outputs log messages.",
+	}
+
+	prg := &program{}
+	s, err := service.New(prg, svcConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	errs := make(chan error, 5)
+	logger, err = s.Logger(errs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(os.Args) > 1 {
+		if os.Args[1] == "install" {
+			err = s.Install()
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				logger.Info("服务安装成功")
+			}
+			return
+		}
+
+		if os.Args[1] == "remove" {
+			err = s.Uninstall()
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				logger.Info("服务卸载成功")
+			}
+			return
+		}
+	}
+
+	//go func() {
+	//	for {
+	//		err := <-errs
+	//		if err != nil {
+	//			log.Print(err)
+	//		}
+	//	}
+	//}()
+	//
+	//if len(*svcFlag) != 0 {
+	//	err := service.Control(s, *svcFlag)
+	//	if err != nil {
+	//		log.Printf("Valid actions: %q\n", service.ControlAction)
+	//		log.Fatal(err)
+	//	}
+	//	return
+	//}
+
+	err = s.Run()
+	if err != nil {
+		logger.Error(err)
+	}
+}
