@@ -32,8 +32,7 @@ func (Blog) GetTable() string {
 
 func (blog *Blog) GetBlogs() []Blog {
 	var blogs []Blog
-	db, _ := framework.GetDB()
-	_ = db.Find(&blogs)
+	_ = framework.GORM.Find(&blogs)
 
 	for i, blog := range blogs {
 		blogs[i].Content = ""

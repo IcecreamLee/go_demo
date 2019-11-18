@@ -60,7 +60,7 @@ func (model *Model) Save(m ModelInterface, data map[string]interface{}) int64 {
 	if model.ID != 0 {
 		args = append(args, model.ID)
 		sql = "UPDATE " + m.GetTable() + " SET " + strings.Join(keys, "=?, ") + "=?" + " WHERE id=?"
-		_, err := db.DB().Exec(sql, args...)
+		_, err := DB.Exec(sql, args...)
 		//execArgs := append([]interface{}{sql}, args...)
 		//_, err := db.Exec(execArgs...)
 		if err != nil {
@@ -70,7 +70,7 @@ func (model *Model) Save(m ModelInterface, data map[string]interface{}) int64 {
 		//db.Table(model.tableName).Where("id=?", model.ID).Updates(data)
 	} else {
 		sql = "INSERT INTO " + m.GetTable() + " (" + strings.Join(keys, ",") + ") VALUES (" + strings.Join(values, ",") + ")"
-		result, err := db.DB().Exec(sql, args...)
+		result, err := DB.Exec(sql, args...)
 		//execArgs := append([]interface{}{sql}, args...)
 		//result, err := db.Exec(execArgs...)
 		if err != nil {

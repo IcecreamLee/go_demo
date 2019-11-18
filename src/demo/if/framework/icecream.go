@@ -18,3 +18,7 @@ func GetIcecream() *Icecream {
 	})
 	return icecream
 }
+
+func IF() *Icecream {
+	return GetIcecream()
+}
