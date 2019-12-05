@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"runtime"
-	"time"
 )
 
 func main() {
 
 	go handleExit()
-
-	go printGoroutineNum()
 
 	go MQSingleton().Run()
 
@@ -26,11 +22,4 @@ func handleExit() {
 	s := <-c
 	fmt.Println("exit", s)
 	os.Exit(0)
-}
-
-func printGoroutineNum() {
-	for {
-		fmt.Println("Goroutine num:", runtime.NumGoroutine())
-		time.Sleep(time.Second * 3)
-	}
 }

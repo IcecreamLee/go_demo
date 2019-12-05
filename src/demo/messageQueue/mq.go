@@ -1,10 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"math/rand"
+	"runtime"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -21,12 +22,17 @@ type Message struct {
 	ExecutedTime int64
 }
 
+// 优先级消息队列
 type MessageStack struct {
 	Messages []Message
 	Lock     sync.RWMutex
 }
 
-func (m *MessageStack) insert(message Message) int {
+// push 插入消息到队列中正确的位置
+func (m *MessageStack) push(message Message) int {
+	m.Lock.Lock()
+	defer m.Lock.Unlock()
+
 	i := 0
 	left := 0
 	right := len(m.Messages) - 1
@@ -68,13 +74,28 @@ func (m *MessageStack) insert(message Message) int {
 	return i
 }
 
-// 延迟队列消息
-type DelayJobStack struct {
-	Messages []Message
-	Lock     sync.RWMutex
+// pop 弹出队列中第一个消息
+func (m *MessageStack) pop() (Message, bool) {
+	m.Lock.Lock()
+	defer m.Lock.Unlock()
+
+	if len(m.Messages) == 0 {
+		return Message{}, false
+	}
+	message := m.Messages[0]
+	m.Messages = m.Messages[1:]
+	return message, true
 }
 
-func (m *DelayJobStack) insert(message Message) int {
+// 延迟队列消息
+type DelayMessageStack struct {
+	MessageStack
+}
+
+func (m *DelayMessageStack) push(message Message) int {
+	m.Lock.Lock()
+	defer m.Lock.Unlock()
+
 	i := 0
 	left := 0
 	right := len(m.Messages) - 1
@@ -118,50 +139,56 @@ func (m *DelayJobStack) insert(message Message) int {
 
 // MessageQueue 消息队列主体
 type MessageQueue struct {
-	MessageStack       MessageStack
-	MaximumConcurrency int // 最大并发执行消息数
+	MessageStack       MessageStack      // 优先级消息队列
+	DelayMessageStack  DelayMessageStack // 延迟消息队列
+	MaximumConcurrency int               // 最大并发执行消息数
 }
 
 var i int
 
 // publish 生产一个消息
 func (m *MessageQueue) publish(message Message) {
-	m.MessageStack.Lock.Lock()
-	defer m.MessageStack.Lock.Unlock()
 	i++
 	message.ID = i
-	m.MessageStack.insert(message)
+	if message.ExecuteTime > time.Now().Unix() {
+		m.DelayMessageStack.push(message)
+	} else {
+		m.MessageStack.push(message)
+	}
 }
 
 // consume 消费一个消息
-func (m *MessageQueue) consume() (Message, error) {
-	m.MessageStack.Lock.Lock()
-	defer m.MessageStack.Lock.Unlock()
-	if len(m.MessageStack.Messages) == 0 {
-		return Message{}, errors.New("no consume")
-	}
-	job := m.MessageStack.Messages[0]
-	m.MessageStack.Messages = m.MessageStack.Messages[1:]
-	return job, nil
+func (m *MessageQueue) consume() (Message, bool) {
+	return m.MessageStack.pop()
 }
 
 // execJob 执行单个消息任务
 func (m *MessageQueue) execJob(job Message) {
-	fmt.Println("execute job:", job)
+	fmt.Println("Execute job:", job, ", Goroutine num:", runtime.NumGoroutine())
 	time.Sleep(time.Duration(3000+rand.Intn(1000)) * time.Millisecond)
-	fmt.Println("executed job:", job)
+	fmt.Println("Executed job:", job, ", Goroutine num:", runtime.NumGoroutine())
 }
 
 // run 消息队列持续的运行
 func (m *MessageQueue) Run() {
-	fmt.Println("MessageQueue running...")
+	fmt.Println("MessageQueue(maximumConcurrency:" + strconv.Itoa(m.MaximumConcurrency) + ") running...")
 
 	jobsChan := make(chan Message, m.MaximumConcurrency)
 
 	go func() {
 		for {
-			job, err := m.consume()
-			if err == nil {
+			message, ok := m.DelayMessageStack.pop()
+			if ok {
+				m.publish(message)
+			}
+			time.Sleep(time.Millisecond * 500)
+		}
+	}()
+
+	go func() {
+		for {
+			job, ok := m.consume()
+			if ok {
 				jobsChan <- job
 			}
 		}
@@ -182,7 +209,7 @@ var mq *MessageQueue
 // 获取MessageQueue单例
 func MQSingleton() *MessageQueue {
 	mqOnce.Do(func() {
-		mq = &MessageQueue{MaximumConcurrency: 3}
+		mq = &MessageQueue{MaximumConcurrency: conf.MaximumConcurrency}
 	})
 	return mq
 }
