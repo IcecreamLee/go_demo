@@ -1,42 +1,23 @@
 package main
 
-import "testing"
+import (
+	"math/rand"
+	"testing"
+)
 
-func TestMessageStack_insert(t *testing.T) {
-	message := Message{Priority: 1}
+func TestMessageStack_push(t *testing.T) {
 	messageStack := MessageStack{}
-	index := messageStack.push(message)
-	if index != 0 {
-		t.Error("find error:", index)
+	for i = 0; i < 100; i++ {
+		message := Message{ID: i, Priority: rand.Intn(10)}
+		messageStack.push(message)
 	}
-	message = Message{Priority: 2}
-	index = messageStack.push(message)
-	if index != 0 {
-		t.Error("find error:", index)
-	}
-	message = Message{Priority: 3}
-	index = messageStack.push(message)
-	if index != 0 {
-		t.Error("find error:", index)
-	}
-	message = Message{Priority: 4}
-	index = messageStack.push(message)
-	if index != 0 {
-		t.Error("find error:", index)
-	}
-	message = Message{Priority: 4}
-	index = messageStack.push(message)
-	if index != 1 {
-		t.Error("find error:", index)
-	}
-	message = Message{Priority: 3}
-	index = messageStack.push(message)
-	if index != 3 {
-		t.Error("find error:", index)
-	}
-	message = Message{Priority: 1}
-	index = messageStack.push(message)
-	if index != 6 {
-		t.Error("find error:", index)
+
+	for i, mesage := range messageStack.Messages {
+		if i != 0 && mesage.Priority == messageStack.Messages[i-1].Priority && mesage.ID < messageStack.Messages[i-1].ID {
+			t.Error("message push position error")
+		}
+		if i != len(messageStack.Messages)-1 && mesage.Priority < messageStack.Messages[i+1].Priority {
+			t.Error("message push position error")
+		}
 	}
 }

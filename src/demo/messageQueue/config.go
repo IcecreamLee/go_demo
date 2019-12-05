@@ -2,7 +2,6 @@ package main
 
 import (
 	"gopkg.in/ini.v1"
-	"icecream/utils"
 	"log"
 )
 
@@ -14,7 +13,7 @@ type config struct {
 }
 
 func init() {
-	iniConfig, err := ini.LoadSources(ini.LoadOptions{IgnoreInlineComment: true}, utils.GetCurrentPath()+"my.ini")
+	iniConfig, err := ini.LoadSources(ini.LoadOptions{IgnoreInlineComment: true}, rootPath+"my.ini")
 	if err != nil {
 		log.Fatalf("Fail to read file: %v", err)
 	}

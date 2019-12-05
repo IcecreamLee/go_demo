@@ -1,0 +1,66 @@
+GET http://localhost:8888/publish?topic=sms&data=1xx&priority=2
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=1xx&priority=1
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=3xx&priority=3
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=2xx&priority=2
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=1xx&priority=1
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=3xx&priority=3
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=2xx&priority=2
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=1xx&priority=1&executeTime=1575516350
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=3xx&priority=3&executeTime=1575516350
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=2xx&priority=2&executeTime=1575516350
+Accept: text/html
+
+###
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=1xx&priority=1&executeTime=1575516350
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=3xx&priority=3&executeTime=1575516350
+Accept: text/html
+
+###
+
+GET http://localhost:8888/publish?topic=sms&data=2xx&priority=2&executeTime=1575516350
+Accept: text/html
+
+###

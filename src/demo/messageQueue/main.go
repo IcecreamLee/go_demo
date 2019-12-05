@@ -2,11 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/IcecreamLee/goutils"
 	"os"
 	"os/signal"
 )
 
+var rootPath string
+
 func main() {
+	rootPath = goutils.GetCurrentPath()
 
 	go handleExit()
 
