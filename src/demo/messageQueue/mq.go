@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/IcecreamLee/goutils"
 	"math"
-	"math/rand"
+	"net/http"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -20,6 +23,7 @@ type Message struct {
 	Result       int
 	ExecuteTime  int64
 	ExecutedTime int64
+	ExecuteURL   string
 }
 
 // 优先级消息队列
@@ -142,12 +146,18 @@ type MessageQueue struct {
 	MessageStack       MessageStack      // 优先级消息队列
 	DelayMessageStack  DelayMessageStack // 延迟消息队列
 	MaximumConcurrency int               // 最大并发执行消息数
+	MessageChan        chan Message      // 正在运行的队列消息channel
+	isRunning          bool              // 消息队列是否正在运行中
 }
 
 var i int
 
 // publish 生产一个消息
-func (m *MessageQueue) publish(message Message) {
+func (m *MessageQueue) publish(message Message) error {
+	if message.Topic == "" || message.Data == "" || message.ExecuteURL == "" {
+		return errors.New("field missing")
+	}
+
 	i++
 	message.ID = i
 	if message.ExecuteTime > time.Now().Unix() {
@@ -155,6 +165,7 @@ func (m *MessageQueue) publish(message Message) {
 	} else {
 		m.MessageStack.push(message)
 	}
+	return nil
 }
 
 // consume 消费一个消息
@@ -163,43 +174,68 @@ func (m *MessageQueue) consume() (Message, bool) {
 }
 
 // execJob 执行单个消息任务
-func (m *MessageQueue) execJob(job Message) {
-	fmt.Println("Execute job:", job, ", Goroutine num:", runtime.NumGoroutine())
-	time.Sleep(time.Duration(3000+rand.Intn(1000)) * time.Millisecond)
-	fmt.Println("Executed job:", job, ", Goroutine num:", runtime.NumGoroutine())
+func (m *MessageQueue) execJob(message Message) {
+	fmt.Println("Consume message:", message, ", Goroutine num:", runtime.NumGoroutine())
+	resp, err := http.Post(message.ExecuteURL, goutils.HttpContentTypeJson, strings.NewReader(message.Data))
+	if err != nil {
+		fmt.Println("Consume message failure:", err.Error(), ", Message:", message)
+	} else {
+		fmt.Println("Consumed message:", resp, "Message:", message)
+	}
 }
 
 // run 消息队列持续的运行
 func (m *MessageQueue) Run() {
 	fmt.Println("MessageQueue(maximumConcurrency:" + strconv.Itoa(m.MaximumConcurrency) + ") running...")
 
-	jobsChan := make(chan Message, m.MaximumConcurrency)
+	m.isRunning = true
+	m.MessageChan = make(chan Message, m.MaximumConcurrency)
 
+	// 延迟队列消息到时间取出插入至优先级队列
 	go func() {
 		for {
+			if !m.isRunning {
+				break
+			}
 			message, ok := m.DelayMessageStack.pop()
 			if ok {
-				m.publish(message)
+				_ = m.publish(message)
 			}
 			time.Sleep(time.Millisecond * 500)
 		}
 	}()
 
+	// 优先级队列消息消费
 	go func() {
 		for {
-			job, ok := m.consume()
+			if !m.isRunning {
+				break
+			}
+			message, ok := m.consume()
 			if ok {
-				jobsChan <- job
+				m.MessageChan <- message
 			}
 		}
 	}()
 
 	for i := 0; i < m.MaximumConcurrency; i++ {
 		go func() {
-			for job := range jobsChan {
+			for job := range m.MessageChan {
 				m.execJob(job)
 			}
 		}()
+	}
+}
+
+// Stop 关闭正在运行的MessageQueue
+func (m *MessageQueue) Stop() {
+	var mu sync.Mutex
+	mu.Lock()
+	defer mu.Unlock()
+	if m.isRunning {
+		m.isRunning = false
+		close(m.MessageChan)
+		fmt.Println("MessageQueue is stopped")
 	}
 }
 

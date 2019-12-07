@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/IcecreamLee/goutils"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,6 +14,7 @@ import (
 func startServer() {
 	fmt.Println("Start server at localhost:" + strconv.Itoa(conf.Port) + "...")
 	http.HandleFunc("/publish", publish)
+	http.HandleFunc("/testMsgCallback", testMsgCallback)
 	err := http.ListenAndServe(":"+strconv.Itoa(conf.Port), nil)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -41,7 +44,21 @@ func publish(w http.ResponseWriter, r *http.Request) {
 		Data:        r.Form.Get("data"),
 		Priority:    priority,
 		ExecuteTime: executeTime,
+		ExecuteURL:  r.Form.Get("executeUrl"),
 	}
-	MQSingleton().publish(job)
+	err = MQSingleton().publish(job)
+	if err != nil {
+		_, _ = w.Write([]byte("failure: " + err.Error()))
+	}
 	_, _ = w.Write([]byte("success"))
+}
+
+func testMsgCallback(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		println("Read the request body failure:", err.Error())
+	}
+	goutils.LogInfo(rootPath+"test.log", string(body))
+	time.Sleep(time.Second)
+	_, _ = w.Write(body)
 }

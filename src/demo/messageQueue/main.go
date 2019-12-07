@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/IcecreamLee/goutils"
 	"os"
 	"os/signal"
@@ -24,6 +23,6 @@ func handleExit() {
 	// 监听所有信号
 	signal.Notify(c)
 	s := <-c
-	fmt.Println("exit", s)
+	goutils.FileLogPrintln(rootPath+"messageQueue", "exit", s)
 	os.Exit(0)
 }
