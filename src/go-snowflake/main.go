@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"icecream/utils"
+	"github.com/IcecreamLee/goutils"
 	"os"
 )
 
-var id *utils.IDGenServ
+var id *goutils.IDGenServ
 
 func main() {
 	loadConfig()
@@ -16,8 +16,8 @@ func main() {
 
 // 加载配置文件
 func loadConfig() {
-	id = utils.GetIDServInstance()
-	file, _ := os.Open(utils.GetCurrentPath() + "conf.json")
+	id = goutils.IDServSingleton()
+	file, _ := os.Open(goutils.GetCurrentPath() + "conf.json")
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	err := decoder.Decode(id)

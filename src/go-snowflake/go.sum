@@ -1,3 +1,5 @@
+github.com/IcecreamLee/goutils v1.0.0 h1:Bav4UAIiQQZWbJmZffCz+wmXiAmtWyfPZPmppueAZvo=
+github.com/IcecreamLee/goutils v1.0.0/go.mod h1:ZrVzg1jivsQ/CxwLXiDrUdRfo5xnduKHT/MVDqCfWIM=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
 github.com/jmoiron/sqlx v1.2.0 h1:41Ip0zITnmWNR/vHV+S4m+VoUivnWY5E4OJfLZjCJMA=
 github.com/jmoiron/sqlx v1.2.0/go.mod h1:1FEQNm3xlJgrMD+FBdI9+xvCksHtbpVBBw5dYhBSsks=
