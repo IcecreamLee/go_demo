@@ -1,7 +1,13 @@
 github.com/IcecreamLee/goutils v1.0.0 h1:Bav4UAIiQQZWbJmZffCz+wmXiAmtWyfPZPmppueAZvo=
 github.com/IcecreamLee/goutils v1.0.0/go.mod h1:ZrVzg1jivsQ/CxwLXiDrUdRfo5xnduKHT/MVDqCfWIM=
+github.com/IcecreamLee/goutils v1.0.2 h1:RImPQETnBQzcSSEL2zweDzBT++VenluEL1SwJJcZcUk=
+github.com/IcecreamLee/goutils v1.0.2/go.mod h1:ZrVzg1jivsQ/CxwLXiDrUdRfo5xnduKHT/MVDqCfWIM=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
 github.com/jmoiron/sqlx v1.2.0 h1:41Ip0zITnmWNR/vHV+S4m+VoUivnWY5E4OJfLZjCJMA=
 github.com/jmoiron/sqlx v1.2.0/go.mod h1:1FEQNm3xlJgrMD+FBdI9+xvCksHtbpVBBw5dYhBSsks=
+github.com/kardianos/service v1.0.0 h1:HgQS3mFfOlyntWX8Oke98JcJLqt1DBcHR4kxShpYef0=
+github.com/kardianos/service v1.0.0/go.mod h1:8CzDhVuCuugtsHyZoTvsOBuvonN/UDBvl0kH+BUxvbo=
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/mattn/go-sqlite3 v1.9.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
+golang.org/x/sys v0.0.0-20190204203706-41f3e6584952 h1:FDfvYgoVsA7TTZSbgiqjAbfPbK47CNHdWl3h/PJtii0=
+golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
