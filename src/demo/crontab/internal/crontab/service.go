@@ -1,50 +1,59 @@
 package crontab
 
 import (
-	"flag"
+	"Demo/crontab/internal/config"
 	"github.com/kardianos/service"
 	"log"
 )
 
-type Service struct {
-	Name string
+var sm *ServiceManager
+
+type ServiceManager struct {
+	ServiceName        string
+	ServiceDisplayName string
+	ServiceDescription string
+	Service            service.Service
 }
 
-func (s *Service) Manage() {
-
+// 接受命令行参数，已接受到返回true,否则返回false
+func (s *ServiceManager) Manage(action string) {
+	err := service.Control(sm.Service, action)
+	if err != nil {
+		log.Printf("Valid actions: %q\n", service.ControlAction)
+		log.Fatal(err)
+	}
 }
 
-func NewService() {
-	svcFlag := flag.String("s", "", "Control the system service.")
-	flag.Parse()
+// 运行服务
+func (s *ServiceManager) Run() {
+	err := sm.Service.Run()
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func NewService() *ServiceManager {
+	InitLogger()
+	sm = &ServiceManager{
+		ServiceName:        config.ServiceName,
+		ServiceDisplayName: config.ServiceDisplayName,
+		ServiceDescription: config.ServiceDescription,
+	}
 
 	// 服务定义
 	svcConfig := &service.Config{
-		Name:        "GoCrontabService",
-		DisplayName: "Go CronTab Service",
-		Description: "This is an Go service that run cron jobs.",
+		Name:        sm.ServiceName,
+		DisplayName: sm.ServiceDisplayName,
+		Description: sm.ServiceDescription,
 	}
 
 	prg := &program{}
-	s, err := service.New(prg, svcConfig)
+	var err error
+	sm.Service, err = service.New(prg, svcConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// 接受命令行参数标志控制服务
-	if len(*svcFlag) != 0 {
-		err := service.Control(s, *svcFlag)
-		if err != nil {
-			log.Printf("Valid actions: %q\n", service.ControlAction)
-			log.Fatal(err)
-		}
-		return
-	}
-
-	err = s.Run()
-	if err != nil {
-		logger.Println(err)
-	}
+	return sm
 }
 
 // Program structures.
@@ -64,7 +73,7 @@ func (p *program) Start(s service.Service) error {
 
 	// Start should not block. Do the actual work async.
 	logger.Printf("I'm running %v.", service.Platform())
-	go NewCrontab().start()
+	go NewCrontab().Start()
 	return nil
 }
 
@@ -73,7 +82,7 @@ func (p *program) Stop(s service.Service) error {
 	// Any work in Stop should be quick, usually a few seconds at most.
 	logger.Println("I'm Stopping...")
 	close(p.exit)
-	ic.stop(true)
+	ct.Stop(true)
 	logger.Println("I'm Stopped!")
 	return nil
 }

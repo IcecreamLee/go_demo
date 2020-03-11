@@ -8,11 +8,12 @@ import (
 
 // Program structures.
 //  Define Start and Stop methods.
+var logger *Logger
+
 type Logger struct {
 	OutFile string
+	*log.Logger
 }
-
-var logger *log.Logger
 
 func InitLogger() {
 	var err error
@@ -21,5 +22,6 @@ func InitLogger() {
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-	logger = log.New(loggerFile, "", log.LstdFlags)
+	logger = &Logger{}
+	logger.Logger = log.New(loggerFile, "", log.LstdFlags)
 }
