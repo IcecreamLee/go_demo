@@ -1,0 +1,471 @@
+@charset "utf-8";
+/* CSS Document */
+* {
+    margin: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+}
+
+html {
+    max-width: 100%;
+    height: auto;
+    font-family: PingFang SC,Helvetica Neue,Hiragino Sans GB,Segoe UI,Microsoft YaHei,微软雅黑,sans-serif
+}
+
+body {
+    line-height: 1;
+    background: #f5f5f5;
+    -webkit-text-size-adjust: auto;
+    font-size: 14px;
+    color: #333;
+}
+
+ol, ul {
+    list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: none;
+}
+
+td {
+    border: solid #ccc 1px;
+}
+
+/* 链接样式 */
+a {
+    text-decoration: none;
+    color: #333;
+}
+
+a:link, a:visited {
+    color: #3f9cdf;
+}
+
+a:hover, a:active {
+    color: #3f9cdf;
+}
+
+input[type="submit"] {
+    -webkit-appearance: none;
+}
+
+img, table {
+    max-width: 100%;
+    height: auto;
+}
+
+/*img{ max-width:100%; height:auto;}*/
+/* 浮动 */
+.fl {
+    float: left;
+    *display: inline;
+}
+
+.fr {
+    float: right;
+    *display: inline;
+}
+
+/* 清除浮动 */
+.clearFix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    visibility: hidden;
+    clear: both;
+}
+
+.clearFix {
+    *zoom: 1;
+}
+
+/* ------------------------ */
+.top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 90, 255, 0.6);
+    position: fixed;
+    z-index: 9999;
+    box-shadow: 0 0 5px 1px rgba(0, 0, 0, .5);
+}
+
+.logo {
+    margin-left: 10%;
+    float: left;
+}
+
+.logo a {
+    text-align: center;
+    font-size: 24px;
+    line-height: 50px;
+    color: #FFF;
+    font-family: Small Fonts,PingFang SC,Helvetica Neue,Hiragino Sans GB,Segoe UI,Microsoft YaHei,微软雅黑,sans-serif;
+}
+
+.logo a:hover {
+    animation: logo 1s infinite;
+    -moz-animation: logo 1s infinite; /*Firefox*/
+    -webkit-animation: logo 1s infinite; /*Safari 和 Chrome*/
+    -o-animation: logo 1s infinite;
+}
+
+.menu {
+    margin-right: 10%;
+    float: right;
+}
+
+.menu li {
+    float: left;
+}
+
+.menu li a {
+    color: #fff;
+    display: block;
+    width: 80px;
+    text-align: center;
+    line-height: 50px;
+}
+
+.menu li a:hover {
+    background: #06F;
+}
+
+.content {
+    width: 80%;
+    padding-top: 60px;
+    margin: 10px auto 0;
+}
+
+.view {
+    background: #fff;
+    box-shadow: 0 1px 7px #bcbcbc;
+    font-size: 14px;
+    color: #333;
+    line-height: 24px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.item {
+    width: 96%;
+    margin-top: 10px;
+    background-color: #ffffff;
+    font-size: 16px;
+    padding: 10px 2%;
+    display: block;
+    box-shadow: 0 1px 7px #bcbcbc;
+    margin-bottom: 20px;
+}
+
+.item:hover {
+    box-shadow: 0 1px 20px #bcbcbc;
+}
+
+.item_title {
+    font-size: 20px;
+    color: #5A5A5A;
+    line-height: 30px;
+    font-weight: 500;
+}
+
+.edit_title {
+    font-size: 14px;
+    color: #3f9cdf;
+}
+
+.item a:hover {
+    color: #00b9eb;
+}
+
+.item p {
+    color: #929292;
+    font-size: 14px;
+    line-height: 26px;
+    margin: 20px 0;
+}
+
+.item p {
+    position: relative;
+    line-height: 1.4em;
+    /* 3 times the line-height to show 3 lines */
+    height: 4.2em;
+    overflow: hidden;
+}
+
+.item p::after {
+    content: "...";
+    font-weight: bold;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 0 20px 1px 45px;
+    background: url(../images/ellipsis_bg.png) repeat-y;
+}
+
+.item_info {
+    color: #69707A;
+    font-size: 12px;
+    height: 50px;
+}
+
+.item_info_l {
+    float: left;
+    /*background: url(<?= base_url()?>/images/portal_caticon.gif) no-repeat 0 4px;*/
+}
+
+.item_info_r {
+    float: right;
+}
+
+/******Page******/
+.view_content {
+    padding: 10px 15px;
+    line-height: 1.8em;
+}
+
+.view_content p {
+    font-size: 16px;
+}
+
+.view_title {
+    text-align: center;
+    font-size: 30px;
+    line-height: 40px;
+    color: #4e5053;
+    width: 100%;
+    display: block;
+    padding: 30px 0;
+    margin-bottom: 20px;
+    border-bottom: #bcc0c4 2px solid;
+}
+
+.view_desc {
+    height: 24px;
+    font-size: 14px;
+    padding: 10px;
+}
+
+.views {
+    float: left
+}
+
+.time {
+    float: right;
+}
+
+.cr_replies {
+    text-align: center;
+    line-height: 24px;
+    color: #969A9E;
+    margin-left: 15px;
+    font-size: 14px;
+    background: url(../images/iconfont-time.png) no-repeat 0 2px;
+    background-size: 21px;
+    padding: 0 10px 0 30px;
+}
+
+.group_views {
+    background: url(../images/iconfont-tag.png) no-repeat 0 1px;
+    padding-left: 30px;
+    font-size: 14px;
+    color: #969A9E;
+    text-align: center;
+    line-height: 24px;
+}
+
+/***************AddBlog***************/
+.submit {
+    background: #ff8140;
+    border: 1px solid #f77c3d;
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    padding: 0 10px 0 10px;
+    white-space: nowrap;
+    display: inline-block;
+    border-radius: 2px;
+    line-height: 25px;
+    text-decoration: none;
+    font-size: 12px;
+    width: 100px;
+    text-align: center;
+    outline: none;
+    margin: 10px auto;
+}
+
+.content_title_input {
+    width: 60%;
+    min-width: 300px;
+    padding: 4px 1%;
+    height: 20px;
+    line-height: 20px;
+    box-shadow: none;
+    background-color: #f2f2f5;
+    border: 1px solid #ccc;
+    color: #808080;
+    outline-style: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.content_type {
+    width: 16%;
+    min-width: 100px;
+    height: 30px;
+    box-shadow: none;
+    background-color: #f2f2f5;
+    border: 1px solid #ccc;
+    color: #808080;
+    outline-style: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.ueditor {
+    margin-top: 10px;
+}
+
+.gototop {
+    position: fixed;
+    right: 20px;
+    bottom: -50px;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 90, 255, 0.6);
+    text-align: center;
+    line-height: 50px;
+    color: #fff;
+    border-radius: 50px;
+    font-size: 20px;
+    box-shadow: 0 1px 5px 1px #bbb;
+    cursor: pointer;
+}
+
+.gototop:hover {
+    background-color: rgba(0, 90, 255, 0.8);
+}
+
+@media screen and (max-width: 600px) {
+    /*当屏幕尺寸小于600px时，应用下面的CSS样式*/
+    .logo {
+        margin: 0;
+        padding-top: 12px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .logo a {
+        text-align: center;
+        font-size: 18px;
+        line-height: 18px;
+        color: #FFF;
+        font-family: Small Fonts,PingFang SC,Helvetica Neue,Hiragino Sans GB,Segoe UI,Microsoft YaHei,微软雅黑,sans-serif;
+    }
+
+    .logo a:hover {
+        animation: logo 1s infinite;
+        -moz-animation: logo 1s infinite; /*Firefox*/
+        -webkit-animation: logo 1s infinite; /*Safari 和 Chrome*/
+        -o-animation: logo 1s infinite;
+    }
+
+    .menu {
+        width: 100%;
+        margin: 0;
+    }
+
+    .menu li {
+        width: 20%;
+        float: left;
+    }
+
+    .menu li a {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    .menu li a:hover {
+        background: #06F;
+    }
+
+    .content {
+        width: 96%;
+        padding-top: 90px;
+        margin: 0 auto;
+    }
+
+    /******lists******/
+    .dir_item {
+        width: 90%;
+        line-height: 20px;
+        margin-top: 10px;
+        padding: 10px 5%;
+        font-size: 16px;
+    }
+
+    /******Page******/
+    .view_title {
+        font-size: 20px;
+        line-height: 30px;
+    }
+}
+
+@keyframes logo {
+    0% {
+        transform: scaleX(1) scaleY(1);
+    }
+    50% {
+        transform: scaleX(1.1) scaleY(1.1);
+    }
+    100% {
+        transform: scaleX(1) scaleY(1);
+    }
+}
+
+/* Firefox */
+@-moz-keyframes logo {
+    0% {
+        -moz-transform: scaleX(1) scaleY(1);
+    }
+    50% {
+        -moz-transform: scaleX(1.1) scaleY(1.1);
+    }
+    100% {
+        -moz-transform: scaleX(1) scaleY(1);
+    }
+}
+
+/* Safari 和 Chrome */
+@-webkit-keyframes logo {
+    0% {
+        -webkit-transform: scaleX(1) scaleY(1);
+    }
+    50% {
+        -webkit-transform: scaleX(1.1) scaleY(1.1);
+    }
+    100% {
+        -webkit-transform: scaleX(1) scaleY(1);
+    }
+}
+
+/* Opera */
+@-o-keyframes logo {
+    0% {
+        -o-transform: scaleX(1) scaleY(1);
+    }
+    50% {
+        -o-transform: scaleX(1.1) scaleY(1.1);
+    }
+    100% {
+        -o-transform: scaleX(1) scaleY(1);
+    }
+}

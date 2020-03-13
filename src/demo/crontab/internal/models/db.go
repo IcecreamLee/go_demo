@@ -10,6 +10,10 @@ import (
 
 var DB *sqlx.DB
 
+func init() {
+	GetDB()
+}
+
 func initDB() {
 	var err error
 	// user:password@tcp(localhost:3306)/dbname?params

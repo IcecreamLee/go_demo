@@ -17,6 +17,10 @@ var (
 	ServiceName        string
 	ServiceDisplayName string
 	ServiceDescription string
+	ServicePort        string
+	WebServicePort     string
+	WebUserName        string
+	WebPassword        string
 )
 
 func init() {
@@ -32,7 +36,13 @@ func init() {
 	DBName = section.Key("db_name").String()
 	CronTableName = section.Key("cron_table_name").String()
 	CronLogTableName = section.Key("cron_log_table_name").String()
+	section = iniConfig.Section("crontab")
 	ServiceName = section.Key("service_name").String()
 	ServiceDisplayName = section.Key("service_display_name").String()
 	ServiceDescription = section.Key("service_description").String()
+	ServicePort = section.Key("service_port").String()
+	section = iniConfig.Section("web")
+	WebServicePort = section.Key("service_port").String()
+	WebUserName = section.Key("username").String()
+	WebPassword = section.Key("password").String()
 }
