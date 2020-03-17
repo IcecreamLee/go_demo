@@ -41,7 +41,7 @@ func NewICrontab() *ICrontab {
 
 // 启动ICrontab
 func (i *ICrontab) Start() {
-	logger.Info("start icrontab")
+	logger.Info("Start ICrontab")
 
 	// 启动任务调度器
 	go i.Scheduler.Start()
@@ -66,7 +66,7 @@ func (i *ICrontab) Start() {
 
 	err := i.httpServer.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		logger.Error("start http service failed: ", err.Error())
+		logger.Error("Start http service failed: ", err.Error())
 		os.Exit(1)
 	}
 }
@@ -100,11 +100,11 @@ type Scheduler struct {
 func (s *Scheduler) Start() {
 	var crontabs []*models.Crontab
 	if s.cronJobs == nil {
-		crontabs = models.GetCrons("id,exp,exec_type,exec_target,last_exec,next_exec")
+		crontabs = models.GetEnabledCrons("id,exp,exec_type,exec_target,last_exec,next_exec")
 	}
 	str := ""
 	for index, curCrontab := range crontabs {
-		logger.Infof("add cron: %+v\n", curCrontab)
+		logger.Infof("Add cron: %+v\n", curCrontab)
 		s.cronJobs = append(s.cronJobs, &CronJob{s, curCrontab})
 		entryID, _ := s.c.AddJob(curCrontab.Exp, s.cronJobs[index])
 		curCrontab.NextExec = s.c.Entry(entryID).Schedule.Next(time.Now())
@@ -131,11 +131,11 @@ func (s *Scheduler) Start() {
 			select {
 			case <-s.minuteTicker.C:
 				if s.isChanged() {
-					logger.Info("crontab is changed, restart...")
+					logger.Info("Crontab is changed, restart...")
 					s.Restart()
 				}
 			case <-s.hourTicker.C:
-				logger.Info("ticker, current goroutine num:", runtime.NumGoroutine())
+				logger.Info("Ticker, current goroutine num:", runtime.NumGoroutine())
 			}
 		}
 	}()
@@ -169,7 +169,7 @@ func (s *Scheduler) StopChildProcess(id int) string {
 
 // 重启任务调度器
 func (s *Scheduler) Restart() {
-	logger.Info("restart scheduler...")
+	logger.Info("Restart scheduler...")
 	s.Stop()
 	s.cronJobs = nil
 	go s.Start()
@@ -177,7 +177,7 @@ func (s *Scheduler) Restart() {
 
 // isCronUpdate 返回cron数据是否有更新
 func (s *Scheduler) isChanged() bool {
-	newCronJobs := models.GetCrons("id,exp,exec_type,exec_target")
+	newCronJobs := models.GetEnabledCrons("id,exp,exec_type,exec_target")
 	var cronJobs []*CronJob
 	var str string
 	for _, curCrontab := range newCronJobs {

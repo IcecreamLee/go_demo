@@ -6,12 +6,12 @@ import (
 )
 
 func SetRouters(r *gin.Engine) {
-	r.GET("/", controllers.Index)
-	r.GET("/index", controllers.Index)
+	r.GET("/", controllers.CheckLogin, controllers.Index)
+	r.GET("/index", controllers.CheckLogin, controllers.Index)
 	r.GET("/login", controllers.Login)
 	r.POST("/login", controllers.Login)
-	r.GET("/crons", controllers.Crons)
-	r.GET("/logs", controllers.Logs)
+	r.GET("/crons", controllers.CheckLogin, controllers.Crons)
+	r.GET("/logs", controllers.CheckLogin, controllers.Logs)
 	r.GET("/add", controllers.Add)
 	r.GET("/edit", controllers.Edit)
 	r.POST("/del", controllers.Del)

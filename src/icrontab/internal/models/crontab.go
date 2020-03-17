@@ -26,7 +26,7 @@ func (c *Crontab) Get(selects string) *Crontab {
 	}
 	err := DB.Get(c, `select `+selects+` from `+config.CronTableName+` where id=? and is_delete = 0 limit 1`, c.ID)
 	if err != nil {
-		logger.Infof("getCron error: %s\n", err.Error())
+		logger.Infof("Crontab Get error: %s\n", err.Error())
 	}
 	return c
 }
@@ -54,7 +54,16 @@ func GetCrons(selects string) []*Crontab {
 	var jobs []*Crontab
 	err := DB.Select(&jobs, `select `+selects+` from `+config.CronTableName+` where is_delete = 0`)
 	if err != nil {
-		logger.Infof("getCrons error: %s\n", err.Error())
+		logger.Infof("GetCrons error: %s\n", err.Error())
+	}
+	return jobs
+}
+
+func GetEnabledCrons(selects string) []*Crontab {
+	var jobs []*Crontab
+	err := DB.Select(&jobs, `select `+selects+` from `+config.CronTableName+` where is_delete=0 and is_enable=1`)
+	if err != nil {
+		logger.Infof("GetCrons error: %s\n", err.Error())
 	}
 	return jobs
 }

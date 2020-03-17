@@ -26,7 +26,7 @@ func (c *CronLog) Get(selects string) *CronLog {
 	}
 	err := DB.Get(c, `select `+selects+` from `+config.CronLogTableName+` where id=? limit 1`, c.ID)
 	if err != nil {
-		logger.Infof("getCronLog error: %s\n", err.Error())
+		logger.Infof("CronLog Get error: %s\n", err.Error())
 	}
 	return c
 }
@@ -51,7 +51,7 @@ func GetCronLogsByCID(cid int, selects string) []*CronLog {
 	var logs []*CronLog
 	err := DB.Select(&logs, `select `+selects+` from `+config.CronLogTableName+` where cid=? order by id desc limit 100`, cid)
 	if err != nil {
-		logger.Infof("getCronLogs error: %s\n", err.Error())
+		logger.Infof("GetCronLogsByCID error: %s\n", err.Error())
 	}
 	return logs
 }

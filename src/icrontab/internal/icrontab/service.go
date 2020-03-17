@@ -77,7 +77,7 @@ func (p *program) Start(s service.Service) error {
 	p.exit = make(chan struct{})
 
 	// Start should not block. Do the actual work async.
-	logger.Info("I'm running %v.", service.Platform())
+	logger.Infof("I'm running %v.", service.Platform())
 
 	p.icrontab = NewICrontab()
 	go p.icrontab.Start()

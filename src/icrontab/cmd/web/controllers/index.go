@@ -41,12 +41,16 @@ func Login(c *gin.Context) {
 	}
 }
 
-// 顶层iframe页
-func Index(c *gin.Context) {
+func CheckLogin(c *gin.Context) {
 	if !isLogin(c) {
 		c.Redirect(301, "/login")
 		return
 	}
+	c.Next()
+}
+
+// 顶层iframe页
+func Index(c *gin.Context) {
 	c.HTML(200, "index.html", gin.H{
 		"title": "首页",
 	})
@@ -54,10 +58,6 @@ func Index(c *gin.Context) {
 
 // 任务列表页
 func Crons(c *gin.Context) {
-	if !isLogin(c) {
-		c.Redirect(301, "/login")
-		return
-	}
 	crons := models.GetCrons("id,title,exp,exec_type,exec_target,last_exec,next_exec,is_enable")
 	println(crons)
 	c.HTML(200, "crons.html", gin.H{
@@ -68,10 +68,6 @@ func Crons(c *gin.Context) {
 
 // 任务历史列表页
 func Logs(c *gin.Context) {
-	if !isLogin(c) {
-		c.Redirect(301, "/login")
-		return
-	}
 	cid := goutils.ToInt(c.Query("cid"))
 	startDate := c.Query("start_date")
 	endDate := c.Query("end_date")
