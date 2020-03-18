@@ -19,7 +19,7 @@ func Login(c *gin.Context) {
 
 	username := c.PostForm("username")
 	password := c.PostForm("password")
-	if username == config.WebUserName && password == config.Password {
+	if username == config.WebUserName && password == config.WebPassword {
 		session.Values["username"] = username
 		session.Values["password"] = password
 		_ = session.Save(c.Request, c.Writer)
@@ -43,7 +43,7 @@ func Login(c *gin.Context) {
 
 func CheckLogin(c *gin.Context) {
 	if !isLogin(c) {
-		c.Redirect(301, "/login")
+		c.Redirect(307, "/login")
 		return
 	}
 	c.Next()
@@ -249,7 +249,7 @@ func Restart(c *gin.Context) {
 
 func isLogin(c *gin.Context) bool {
 	session := helpers.GetSession(c)
-	if session.Values["username"] == config.WebUserName && session.Values["password"] == config.Password {
+	if session.Values["username"] == config.WebUserName && session.Values["password"] == config.WebPassword {
 		return true
 	}
 	return false

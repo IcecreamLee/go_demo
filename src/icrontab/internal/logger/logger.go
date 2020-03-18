@@ -32,3 +32,10 @@ func init() {
 	Error = errorLog.Println
 	Errorf = errorLog.Printf
 }
+
+func IfError(format string, err error, v ...interface{}) {
+	if err != nil {
+		v = append([]interface{}{err}, v...)
+		Errorf(format, v...)
+	}
+}

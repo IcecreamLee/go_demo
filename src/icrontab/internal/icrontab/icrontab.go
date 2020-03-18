@@ -106,10 +106,14 @@ func (s *Scheduler) Start() {
 	for index, curCrontab := range crontabs {
 		logger.Infof("Add cron: %+v\n", curCrontab)
 		s.cronJobs = append(s.cronJobs, &CronJob{s, curCrontab})
-		entryID, _ := s.c.AddJob(curCrontab.Exp, s.cronJobs[index])
-		curCrontab.NextExec = s.c.Entry(entryID).Schedule.Next(time.Now())
-		curCrontab.CronId = int(entryID)
-		curCrontab.Update()
+		entryID, err := s.c.AddJob(curCrontab.Exp, s.cronJobs[index])
+		if err != nil {
+			logger.Errorf("Cron[id=%d] exp error: %s", curCrontab.ID, err.Error())
+		} else {
+			curCrontab.NextExec = s.c.Entry(entryID).Schedule.Next(time.Now())
+			curCrontab.CronId = int(entryID)
+			curCrontab.Update()
+		}
 		if s.crontabMD5 == "" {
 			str = str + fmt.Sprintf("%d%s%s%s", curCrontab.ID, curCrontab.Exp, curCrontab.ExecType, curCrontab.ExecTarget)
 		}
