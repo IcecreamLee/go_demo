@@ -20,19 +20,21 @@ type CronLog struct {
 	ExecResult    string    `db:"exec_result"`
 }
 
+func (c *CronLog) GetTableName() string {
+	return config.CronLogTableName
+}
+
 func (c *CronLog) Get(selects string) *CronLog {
 	if selects == "*" {
 		selects = "id,cid,pid,is_crontab,exec_start_time,exec_end_time,exec_type,exec_target,exec_status,exec_result"
 	}
-	err := DB.Get(c, `select `+selects+` from `+config.CronLogTableName+` where id=? limit 1`, c.ID)
-	if err != nil {
-		logger.Infof("CronLog Get error: %s\n", err.Error())
-	}
+	err := DB.Get(c, `select `+selects+` from `+c.GetTableName()+` where id=? limit 1`, c.ID)
+	logger.IfError("Failed to get cron log: %s", err)
 	return c
 }
 
 func (c *CronLog) Insert() int64 {
-	sql := `insert into ` + config.CronLogTableName + ` (cid,pid,is_crontab,exec_start_time,exec_type,exec_target,exec_status,exec_result) values (?,?,?,?,?,?,?,?)`
+	sql := `insert into ` + c.GetTableName() + ` (cid,pid,is_crontab,exec_start_time,exec_type,exec_target,exec_status,exec_result) values (?,?,?,?,?,?,?,?)`
 	res := GetDB().MustExec(sql, c.CID, c.PID, c.IsCrontab, c.ExecStartTime, c.ExecType, c.ExecTarget, c.ExecStatus, c.ExecResult)
 	id, err := res.LastInsertId()
 	if err != nil {
@@ -43,14 +45,14 @@ func (c *CronLog) Insert() int64 {
 }
 
 func (c *CronLog) Update() {
-	sql := `update ` + config.CronLogTableName + ` set pid=?,exec_end_time=?,exec_status=?,exec_result=? where id=?`
+	sql := `update ` + c.GetTableName() + ` set pid=?,exec_end_time=?,exec_status=?,exec_result=? where id=?`
 	_, err := GetDB().Exec(sql, c.PID, c.ExecEndTime, c.ExecStatus, c.ExecResult, c.ID)
-	logger.IfError("Update CronLog failed: %s", err)
+	logger.IfError("Failed to update cron log: %s", err)
 }
 
 func GetCronLogsByCID(cid int, selects string) []*CronLog {
 	var logs []*CronLog
 	err := DB.Select(&logs, `select `+selects+` from `+config.CronLogTableName+` where cid=? order by id desc limit 100`, cid)
-	logger.IfError("GetCronLogsByCID error: %s", err)
+	logger.IfError("Failed to get cron log by cid: %s", err)
 	return logs
 }

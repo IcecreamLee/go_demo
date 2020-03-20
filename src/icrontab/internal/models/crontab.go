@@ -20,30 +20,32 @@ type Crontab struct {
 	IsEnable   int       `db:"is_enable"`
 }
 
+func (c *Crontab) GetTableName() string {
+	return config.CronTableName
+}
+
 func (c *Crontab) Get(selects string) *Crontab {
 	if selects == "*" {
 		selects = "id,title,cron_id,exp,exec_type,exec_target,last_exec,next_exec,is_enable"
 	}
-	err := DB.Get(c, `select `+selects+` from `+config.CronTableName+` where id=? and is_delete = 0 limit 1`, c.ID)
-	if err != nil {
-		logger.Infof("Crontab Get error: %s\n", err.Error())
-	}
+	err := DB.Get(c, `select `+selects+` from `+c.GetTableName()+` where id=? and is_delete = 0 limit 1`, c.ID)
+	logger.IfError("Failed to get crontab: %s", err)
 	return c
 }
 
 func (c *Crontab) Update() {
-	sql := `update ` + config.CronTableName + ` set cron_id = ?,last_exec =? ,next_exec = ? where id = ?`
+	sql := `update ` + c.GetTableName() + ` set cron_id = ?,last_exec =? ,next_exec = ? where id = ?`
 	GetDB().MustExec(sql, c.CronId, c.LastExec, c.NextExec, c.ID)
 }
 
 func (c *Crontab) Enable() {
-	sql := `update ` + config.CronTableName + ` set is_enable = ? where id = ?`
+	sql := `update ` + c.GetTableName() + ` set is_enable = ? where id = ?`
 	GetDB().MustExec(sql, c.IsEnable, c.ID)
 }
 
 func (c *Crontab) Del() {
-	sql := `update ` + config.CronTableName + ` set is_delete = 1 where id = ?`
-	GetDB().MustExec(sql, c.IsEnable, c.ID)
+	sql := `update ` + c.GetTableName() + ` set is_delete = 1 where id = ?`
+	GetDB().MustExec(sql, c.ID)
 }
 
 func (c *Crontab) String() string {
@@ -53,17 +55,13 @@ func (c *Crontab) String() string {
 func GetCrons(selects string) []*Crontab {
 	var jobs []*Crontab
 	err := DB.Select(&jobs, `select `+selects+` from `+config.CronTableName+` where is_delete = 0`)
-	if err != nil {
-		logger.Infof("GetCrons error: %s\n", err.Error())
-	}
+	logger.IfError("Failed to get crontabs: %s", err)
 	return jobs
 }
 
 func GetEnabledCrons(selects string) []*Crontab {
 	var jobs []*Crontab
 	err := DB.Select(&jobs, `select `+selects+` from `+config.CronTableName+` where is_delete=0 and is_enable=1`)
-	if err != nil {
-		logger.Infof("GetCrons error: %s\n", err.Error())
-	}
+	logger.IfError("Failed to get enabled crontabs: %s", err)
 	return jobs
 }

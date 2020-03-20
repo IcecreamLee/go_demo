@@ -68,8 +68,8 @@
                                 <td>{{$cron.Exp}}</td>
                                 <td>{{$cron.ExecType}}</td>
                                 <td>{{$cron.ExecTarget}}</td>
-                                <td>{{$cron.LastExec}}</td>
-                                <td>{{$cron.NextExec}}</td>
+                                <td>{{$cron.LastExec | formatDatetime}}</td>
+                                <td>{{$cron.NextExec | formatDatetime}}</td>
                                 <td class="td-status">
                                     <input type="checkbox" name="switch" lay-text="开启|停用" lay-skin="switch" lay-filter="enable" onchange="enable(this)" {{if eq $cron.IsEnable 1}}checked{{end}}>
                                 </td>
@@ -79,7 +79,8 @@
                                     <a title="立即执行" onclick="exec(this)" href="javascript:;">
                                         <i class="layui-icon">&#xe669;</i>
                                         <i class="layui-icon layui-icon-loading layui-icon layui-anim layui-anim-rotate layui-anim-loop" style="display: none"></i>
-                                    </a> <a title="编辑" onclick="xadmin.open('编辑','edit',600,400)" href="javascript:;">
+                                    </a>
+                                    <a title="编辑" onclick="xadmin.open('编辑','edit?id={{$cron.ID}}',500,400)" href="javascript:;">
                                         <i class="layui-icon">&#xe642;</i> </a>
                                     <a title="删除" onclick="del(this)" href="javascript:;">
                                         <i class="layui-icon">&#xe640;</i> </a>
@@ -117,7 +118,7 @@
     /*任务-删除*/
     function del(obj) {
         var id = $(obj).parent().parent().children().eq(0).text();
-        layer.confirm('确认要删除吗？', function (index) {
+        layer.confirm('确认要删除吗？', {shadeClose: true}, function (index) {
             $.post('del', {cid: id}, function (res) {
                 if (res.code === 0) {
                     $(obj).parents("tr").remove();
@@ -131,7 +132,7 @@
 
     function exec(obj) {
         var id = $(obj).parent().parent().children().eq(0).text();
-        layer.confirm('确认要运行吗？', function (index) {
+        layer.confirm('确认要运行吗？', {shadeClose: true}, function (index) {
             $(obj).children().eq(0).hide().next().show();
             $.post('run', {cid: id}, function (res) {
                 $(obj).children().eq(0).show().next().hide();
@@ -146,7 +147,7 @@
     }
 
     function restart(obj) {
-        layer.confirm('确认要重启吗？', function (index) {
+        layer.confirm('确认要重启吗？', {shadeClose: true}, function (index) {
             $(obj).children().eq(0).hide().next().show();
             $.post('restart', null, function (res) {
                 layer.msg(res.msg);

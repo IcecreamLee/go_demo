@@ -7,6 +7,7 @@ import (
 	"icrontab/internal/logger"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var DB *sqlx.DB
@@ -30,4 +31,36 @@ func GetDB() *sqlx.DB {
 		initDB()
 	}
 	return DB
+}
+
+func UpdateWithMap(table string, data map[string]interface{}, condition map[string]interface{}) error {
+	var updates []string
+	var args []interface{}
+	var conditions []string
+	for key, value := range data {
+		updates = append(updates, key+"=?")
+		args = append(args, value)
+	}
+	for key, value := range condition {
+		conditions = append(conditions, key+"=?")
+		args = append(args, value)
+	}
+
+	sql := `UPDATE ` + table + ` SET ` + strings.Join(updates, ",") + ` WHERE ` + strings.Join(conditions, " AND ")
+	_, err := GetDB().Exec(sql, args...)
+	return err
+}
+
+func InsertWithMap(table string, data map[string]interface{}) error {
+	var fields []string
+	var placeholders []string
+	var args []interface{}
+	for key, value := range data {
+		fields = append(fields, key)
+		placeholders = append(placeholders, "?")
+		args = append(args, value)
+	}
+	sql := "INSERT INTO " + table + " (" + strings.Join(fields, ",") + ") VALUES (" + strings.Join(placeholders, ",") + ")"
+	_, err := GetDB().Exec(sql, args...)
+	return err
 }

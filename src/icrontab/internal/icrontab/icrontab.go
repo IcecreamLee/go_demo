@@ -1,6 +1,7 @@
 package icrontab
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/IcecreamLee/goutils"
@@ -156,6 +157,7 @@ func (s *Scheduler) Stop() context.Context {
 
 // 停止子进程
 func (s *Scheduler) StopChildProcess(id int) string {
+	defer logger.Recover(fmt.Sprintf("Failed to stop child process: cron_log.id=%d", id), nil)
 	cronLog := (&models.CronLog{ID: id}).Get("*")
 	var err error
 	cmd, ok := s.childProcesses[cronLog.PID]
@@ -173,6 +175,7 @@ func (s *Scheduler) StopChildProcess(id int) string {
 
 // 重启任务调度器
 func (s *Scheduler) Restart() {
+	defer logger.Recover("Failed to restart scheduler", nil)
 	logger.Info("Restart scheduler...")
 	s.Stop()
 	s.cronJobs = nil
@@ -181,14 +184,21 @@ func (s *Scheduler) Restart() {
 
 // isCronUpdate 返回cron数据是否有更新
 func (s *Scheduler) isChanged() bool {
-	newCronJobs := models.GetEnabledCrons("id,exp,exec_type,exec_target")
+	defer logger.Recover("Failed to check is change", nil)
+
 	var cronJobs []*CronJob
 	var str string
+	newCronJobs := models.GetEnabledCrons("id,exp,exec_type,exec_target")
 	for _, curCrontab := range newCronJobs {
 		cronJobs = append(cronJobs, &CronJob{s, curCrontab})
 		str = str + fmt.Sprintf("%d%s%s%s", curCrontab.ID, curCrontab.Exp, curCrontab.ExecType, curCrontab.ExecTarget)
 	}
-	newCronJobsMD5 := goutils.MD5Str([]byte(str))
+
+	var newCronJobsMD5 string
+	if str != "" {
+		newCronJobsMD5 = goutils.MD5Str([]byte(str))
+	}
+
 	if s.crontabMD5 == newCronJobsMD5 {
 		return false
 	}
@@ -205,12 +215,16 @@ type CronJob struct {
 
 // 运行任务
 func (c *CronJob) Run() {
-	entry := c.scheduler.c.Entry(cron.EntryID(c.CronId))
-	if entry.Prev.Unix() > 0 {
-		c.LastExec = entry.Prev
+	defer logger.Recover(fmt.Sprintf("CronJob failed to run: %+v", c.Crontab), nil)
+
+	if c.scheduler != nil {
+		entry := c.scheduler.c.Entry(cron.EntryID(c.CronId))
+		if entry.Prev.Unix() > 0 {
+			c.LastExec = entry.Prev
+		}
+		c.NextExec = entry.Next
+		c.Update()
 	}
-	c.NextExec = entry.Next
-	c.Update()
 
 	if c.ExecTarget == "" {
 		return
@@ -224,6 +238,9 @@ func (c *CronJob) Run() {
 
 	if c.ExecType == "shell" {
 		cmd := exec.Command(c.ExecTarget)
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &out
 		err := cmd.Start()
 		cronLog.PID = cmd.Process.Pid
 		cronLog.IsCrontab = 1
@@ -232,11 +249,14 @@ func (c *CronJob) Run() {
 
 		err = cmd.Wait()
 		delete(c.scheduler.childProcesses, cronLog.PID)
-		if err != nil {
+		if err == nil {
+			cronLog.ExecResult = "finished:"
+		} else {
 			cronLog.ExecResult = "failed:" + err.Error()
 		}
 		cronLog.ExecStatus = 1
 		cronLog.ExecEndTime = time.Now()
+		cronLog.ExecResult += goutils.SubStr(out.String(), 0, 500)
 		cronLog.Update()
 	}
 }

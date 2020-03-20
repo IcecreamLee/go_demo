@@ -18,17 +18,18 @@
 <body>
 <div class="layui-fluid">
     <div class="layui-row">
-        <form class="layui-form">
+        <form class="layui-form" method="post">
+            <input type="hidden" name="id" value="{{.crontab.ID}}">
             <div class="layui-form-item">
                 <label for="title" class="layui-form-label"> <span class="x-red">*</span>任务名称 </label>
                 <div class="layui-input-inline">
-                    <input type="text" id="title" name="title" required="" lay-verify="required" autocomplete="off" class="layui-input">
+                    <input type="text" id="title" name="title" value="{{.crontab.Title}}" required="" lay-verify="required" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label for="exp" class="layui-form-label"> <span class="x-red">*</span>任务表达式 </label>
                 <div class="layui-input-inline">
-                    <input type="text" id="exp" name="exp" required="" lay-verify="phone" autocomplete="off" class="layui-input">
+                    <input type="text" id="exp" name="exp" value="{{.crontab.Exp}}" required="" lay-verify="required" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
@@ -36,19 +37,25 @@
                 <div class="layui-input-inline layui-show-xs-block">
                     <select id="execType" name="exec_type">
                         <option>shell</option>
-                        <option>http</option>
+                        {{/*<option {{if eq .crontab.ExecType "http"}}selected{{end}}>http</option>*/}}
                     </select>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label for="execTarget" class="layui-form-label"> <span class="x-red">*</span>执行内容 </label>
                 <div class="layui-input-inline">
-                    <input type="password" id="execTarget" name="exec_target" required="" lay-verify="pass" autocomplete="off" class="layui-input">
+                    <input type="text" id="execTarget" name="exec_target" value="{{.crontab.ExecTarget}}" required="" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="execTarget" class="layui-form-label"> <span class="x-red">*</span>是否启用 </label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" name="is_enable" lay-text="开启|停用" lay-skin="switch" lay-filter="enable" value="1" {{if eq .crontab.IsEnable 1}}checked{{end}}>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label for="L_repass" class="layui-form-label"> </label>
-                <button class="layui-btn" lay-filter="add" lay-submit="">保存</button>
+                <button class="layui-btn" lay-filter="submit" lay-submit="">保存</button>
             </div>
         </form>
     </div>
@@ -56,7 +63,16 @@
 </body>
 <script>
     layui.use(['laydate', 'form'], function () {
-        var laydate = layui.laydate;
+        var form = layui.form;
+        form.on('submit(submit)', function (data) {
+            $.post("", data.field, function (r) {
+                layer.msg(r.msg);
+                setTimeout(function () {
+                    parent.location.reload();
+                }, 2000)
+            });
+            return false;
+        });
     });
 </script>
 </html>

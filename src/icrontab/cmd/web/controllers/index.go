@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"github.com/IcecreamLee/goutils"
 	"github.com/gin-gonic/gin"
 	"icrontab/cmd/web/helpers"
@@ -23,16 +24,10 @@ func Login(c *gin.Context) {
 		session.Values["username"] = username
 		session.Values["password"] = password
 		_ = session.Save(c.Request, c.Writer)
-		c.JSON(200, gin.H{
-			"code": 0,
-			"msg":  "登录成功",
-		})
+		c.JSON(200, gin.H{"code": 0, "msg": "登录成功"})
 	} else if username != "" || password != "" {
 		_ = session.Save(c.Request, c.Writer)
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "登录失败",
-		})
+		c.JSON(200, gin.H{"code": 1, "msg": "登录失败"})
 	} else {
 		_ = session.Save(c.Request, c.Writer)
 		c.HTML(200, "login.html", gin.H{
@@ -44,6 +39,14 @@ func Login(c *gin.Context) {
 func CheckLogin(c *gin.Context) {
 	if !isLogin(c) {
 		c.Redirect(307, "/login")
+		return
+	}
+	c.Next()
+}
+
+func CheckLoginForAjax(c *gin.Context) {
+	if !isLogin(c) {
+		c.JSON(200, gin.H{"code": 1, "msg": "登录失效"})
 		return
 	}
 	c.Next()
@@ -83,72 +86,79 @@ func Logs(c *gin.Context) {
 
 // 新增任务
 func Add(c *gin.Context) {
-	c.HTML(200, "add.html", gin.H{
-		"title": "新增任务",
+	c.HTML(200, "edit.html", gin.H{
+		"title":   "新增任务",
+		"crontab": &models.Crontab{},
 	})
 }
 
 // 编辑任务
 func Edit(c *gin.Context) {
+	id := c.Query("id")
+	crontab := (&models.Crontab{ID: goutils.ToInt(id)}).Get("*")
 	c.HTML(200, "edit.html", gin.H{
-		"title": "编辑任务",
+		"title":   "编辑任务",
+		"crontab": crontab,
 	})
+}
+
+func SaveCrontab(c *gin.Context) {
+	id := goutils.ToInt(c.PostForm("id"))
+	crontab := &models.Crontab{}
+	data := map[string]interface{}{
+		"title":       c.PostForm("title"),
+		"exp":         c.PostForm("exp"),
+		"exec_type":   c.PostForm("exec_type"),
+		"exec_target": c.PostForm("exec_target"),
+		"is_enable":   goutils.ToInt(c.PostForm("is_enable")),
+	}
+	if id > 0 {
+		err := models.UpdateWithMap(
+			crontab.GetTableName(),
+			data,
+			map[string]interface{}{
+				"id": id,
+			},
+		)
+		if err != nil {
+			c.JSON(200, gin.H{"code": 1, "msg": "更新失败"})
+		} else {
+			c.JSON(200, gin.H{"code": 1, "msg": "更新成功"})
+		}
+	} else {
+		err := models.InsertWithMap(crontab.GetTableName(), data)
+		if err != nil {
+			c.JSON(200, gin.H{"code": 1, "msg": "新增失败"})
+		} else {
+			c.JSON(200, gin.H{"code": 1, "msg": "新增成功"})
+		}
+	}
 }
 
 // 删除任务
 func Del(c *gin.Context) {
-	if !isLogin(c) {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "登录失效",
-		})
-		return
-	}
 	cid := c.PostForm("cid")
 	(&models.Crontab{ID: goutils.ToInt(cid)}).Del()
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "操作成功",
-	})
+	c.JSON(200, gin.H{"code": 0, "msg": "操作成功"})
 }
 
 // 启用/禁用任务
 func Enable(c *gin.Context) {
-	if !isLogin(c) {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "登录失效",
-		})
-		return
-	}
 	cid := c.PostForm("cid")
 	enable := c.PostForm("enable")
 	if enable != "1" {
 		enable = "0"
 	}
 	(&models.Crontab{ID: goutils.ToInt(cid), IsEnable: goutils.ToInt(enable)}).Enable()
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "操作成功",
-	})
+	c.JSON(200, gin.H{"code": 0, "msg": "操作成功"})
 }
 
 // 运行任务
 func Run(c *gin.Context) {
-	if !isLogin(c) {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "登录失效",
-		})
-		return
-	}
 	cid := c.PostForm("cid")
 	cron := (&models.Crontab{ID: goutils.ToInt(cid)}).Get("*")
 	if cron.ExecTarget == "" {
-		c.JSON(200, gin.H{
-			"code": 0,
-			"msg":  "操作成功",
-		})
+		c.JSON(200, gin.H{"code": 0, "msg": "操作成功"})
 		return
 	}
 
@@ -161,6 +171,9 @@ func Run(c *gin.Context) {
 
 	if cron.ExecType == "shell" {
 		cmd := exec.Command(cron.ExecTarget)
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &out
 		err := cmd.Start()
 		cronLog.PID = cmd.Process.Pid
 		cronLog.Insert()
@@ -168,34 +181,22 @@ func Run(c *gin.Context) {
 
 		err = cmd.Wait()
 		delete(childProcesses, cronLog.PID)
-
-		if err != nil {
-			cronLog.ExecResult = "failed:" + err.Error()
-			c.JSON(200, gin.H{
-				"code": 1,
-				"msg":  "运行失败：" + err.Error(),
-			})
+		if err == nil {
+			cronLog.ExecResult = "finished:"
+			c.JSON(200, gin.H{"code": 0, "msg": "运行完成"})
 		} else {
-			c.JSON(200, gin.H{
-				"code": 0,
-				"msg":  "运行完成",
-			})
+			cronLog.ExecResult = "failed:" + err.Error()
+			c.JSON(200, gin.H{"code": 1, "msg": "运行失败：" + err.Error()})
 		}
 		cronLog.ExecStatus = 1
 		cronLog.ExecEndTime = time.Now()
+		cronLog.ExecResult += goutils.SubStr(out.String(), 0, 500)
 		cronLog.Update()
 	}
 }
 
 // 停止任务
 func Stop(c *gin.Context) {
-	if !isLogin(c) {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "登录失效",
-		})
-		return
-	}
 	id := c.PostForm("id")
 	cronLog := (&models.CronLog{ID: goutils.ToInt(id)}).Get("*")
 
@@ -212,35 +213,18 @@ func Stop(c *gin.Context) {
 		err = cmd.Process.Kill()
 		delete(childProcesses, cronLog.PID)
 		if err != nil {
-			c.JSON(200, gin.H{
-				"code": 1,
-				"msg":  "操作失败，" + err.Error(),
-			})
+			c.JSON(200, gin.H{"code": 1, "msg": "操作失败，" + err.Error()})
 			return
 		}
 	} else {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "操作失败，子进程不存在",
-		})
+		c.JSON(200, gin.H{"code": 1, "msg": "操作失败，子进程不存在"})
 		return
 	}
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "操作成功",
-	})
+	c.JSON(200, gin.H{"code": 0, "msg": "操作成功"})
 }
 
 // 停止任务
 func Restart(c *gin.Context) {
-	if !isLogin(c) {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "登录失效",
-		})
-		return
-	}
-
 	res := goutils.HttpPost("http://localhost:"+config.ServicePort+"/restart", "", goutils.HttpContentTypeForm)
 	c.Header("Content-Type", goutils.HttpContentTypeJson)
 	c.String(200, res)

@@ -30,10 +30,10 @@
                     <form class="layui-form layui-col-space5">
                         <input type="hidden" name="cid" value="{{.cid}}">
                         <div class="layui-inline layui-show-xs-block">
-                            <input class="layui-input"  autocomplete="off" placeholder="开始日期" name="start_date" id="start" value="{{.startDate}}">
+                            <input class="layui-input" autocomplete="off" placeholder="开始日期" name="start_date" id="start" value="{{.startDate}}">
                         </div>
                         <div class="layui-inline layui-show-xs-block">
-                            <input class="layui-input"  autocomplete="off" placeholder="截止日期" name="end_date" id="end" value="{{.endDate}}">
+                            <input class="layui-input" autocomplete="off" placeholder="截止日期" name="end_date" id="end" value="{{.endDate}}">
                         </div>
                         <div class="layui-inline layui-show-xs-block">
                             <button class="layui-btn" lay-submit="" lay-filter="sreach">
@@ -59,27 +59,26 @@
                         </thead>
                         <tbody>
                         {{range $key, $log := .logs }}
-                        <tr>
-                            <td>{{$log.ID}}</td>
-                            <td>{{$log.CID}}</td>
-                            <td>{{$log.PID}}</td>
-                            <td>{{$log.ExecStartTime}}</td>
-                            <td>{{$log.ExecEndTime}}</td>
-                            <td>{{$log.ExecType}}</td>
-                            <td>{{$log.ExecTarget}}</td>
-                            <td style="text-align: center">
-                                {{if eq $log.ExecStatus 1}}运行完成{{else}}正在运行{{end}}
-                                {{if eq $log.IsCrontab 0}}<br>（手动触发）{{end}}
-                            </td>
-                            <td>{{$log.ExecResult}}</td>
-                            <td class="td-manage">
-                                {{if eq $log.ExecStatus 0 }}
-                                <a title="停止运行" onclick="stop(this)" href="javascript:;">
-                                    <i class="layui-icon">&#xe617;</i>
-                                </a>
-                                {{end}}
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>{{$log.ID}}</td>
+                                <td>{{$log.CID}}</td>
+                                <td>{{$log.PID}}</td>
+                                <td>{{$log.ExecStartTime | formatDatetime}}</td>
+                                <td>{{$log.ExecEndTime | formatDatetime}}</td>
+                                <td>{{$log.ExecType}}</td>
+                                <td>{{$log.ExecTarget}}</td>
+                                <td style="text-align: center">
+                                    {{if eq $log.ExecStatus 1}}运行完成{{else}}正在运行{{end}}
+                                    {{if eq $log.IsCrontab 0}}<br>（手动触发）{{end}}
+                                </td>
+                                <td title="{{$log.ExecResult}}" style="overflow: hidden;text-overflow:ellipsis;width: 100px;max-width: 200px;white-space: nowrap;">{{$log.ExecResult}}</td>
+                                <td class="td-manage">
+                                    {{if eq $log.ExecStatus 0 }}
+                                        <a title="停止运行" onclick="stop(this)" href="javascript:;">
+                                            <i class="layui-icon">&#xe617;</i> </a>
+                                    {{end}}
+                                </td>
+                            </tr>
                         {{end}}
                         </tbody>
                     </table>
@@ -90,9 +89,9 @@
 </div>
 </body>
 <script>
-    layui.use(['laydate','form'], function(){
+    layui.use(['laydate', 'form'], function () {
         var laydate = layui.laydate;
-        var  form = layui.form;
+        var form = layui.form;
 
         //执行一个laydate实例
         laydate.render({
@@ -108,7 +107,7 @@
     // 停止任务
     function stop(obj) {
         var id = $(obj).parent().parent().children().eq(0).text();
-        layer.confirm('确认要停止吗？', function (index) {
+        layer.confirm('确认要停止吗？', {shadeClose: true}, function (index) {
             $.post('stop', {id: id}, function (res) {
                 layer.msg(res.msg);
                 if (res.code === 0) {
