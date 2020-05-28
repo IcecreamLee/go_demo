@@ -88,7 +88,7 @@ var config *Config
 // 加载配置文件
 func init() {
 	config = &Config{}
-	fmt.Println(getCurrentPath() + "config.json")
+	file, _ := os.Open(getCurrentPath() + "config.json")
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	err := decoder.Decode(config)
